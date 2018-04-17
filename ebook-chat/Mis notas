@@ -1,0 +1,36 @@
+Esto es para hacerme una idea de como está hecho el proyecto:
+
+br.com.jorgecetozi.ebookChat.authentication.api.AuthenticationController:
+
+Clase con @Controller, tiene inyectado dos servicios, UserService y NewUserValidator.
+
+		UserService es una interfaz, el verdadero servicio está implementado por DefaultUserService.
+		DefaultUserService tiene inyectados 3 interfaces, UserRepository, RoleRepository y BCryptPasswordEncoder.
+		UserRepository extiende de JpaRepository, es decir, spring-data-jpa está al mando, tiene un pojo User, con anotaciones muy correctas para describir los campos de la tabla. MOLA!
+		RoleRepository extiende de JpaRepository, tiene un pojo Role, igual que el anterior.
+		BCryptPasswordEncoder extiende de PasswordEncoder, es decir, spring-security-core está al mando. :)		
+		NewUserValidator implementa Validator, de spring-context, nos sirve para hacer validaciones, tiene inyectado UserRepository.
+		
+Los dos servicios inyectados usados en este controlador usan spring-data-jpa para gestionar la autentificacion de usuarios contra un sgbd relacional mysql. 
+	
+El paquete br.com.jorgecetozi.ebookChat.authentication gestiona el mecanismo de autentificacion, tiene servicios que usan inyeccion de dependencias, 
+gestionadas a su vez por spring-data-jpa. Usa pojos, Repositorios que usan esos pojos, servicios de validacion que implementan interfaces de spring-validation y demas tecnologia de spring-data-jpa.
+
+br.com.jorgeacetozi.ebookChat.chat.api.ChatController
+
+Clase con @Controller, tiene inyectado un servicio con una interfaz, ChatRoomService. 
+Una clase implementa esa interfaz, RedisChatRoomService.
+RedisChatRoomService parece ser una implementacion que usa la bd Redis, tiene inyectado tres servicios:
+
+	1) SimpMessagingTemplate, que usa el proyecto spring-messaging.
+	2) ChatRoomRepository implementa org.springframework.data.repository.CrudRepository de spring-data-commons. 
+		Usa un pojo ChatRoom, especial para ser usado por redis.
+		A su vez ChatRoom, tiene campos y una lista de ChatRoomUser para gestionar el nombre de los usuarios conectados.
+	3) InstantMessageService es una interfaz, tiene una implementacion CassandraInstantMessageService.
+		
+		CassandraInstantMessageService tiene inyectado otros dos servicios:
+			1) InstantMessageRepository extiende de CassandraRepository con un pojo InstantMessage
+			2) ChatRoomService??? no hay referencia circular aqui? esto tiene una implementacion en RedisChatRoomService...
+
+	
+			 
